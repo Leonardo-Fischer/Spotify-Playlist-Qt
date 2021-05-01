@@ -12,7 +12,7 @@ MainWindow::MainWindow(QWidget *parent)
     playlist = new QMediaPlaylist; //cria o objeto para playlist de mídia
 
     player = new QMediaPlayer; //cria o objeto para execução de mídia
-    connect(player, SIGNAL(currentMediaChanged(QMediaContent)), this, SLOT(currentMediaChanged(QMediaContent))); //havia um 'const'
+    connect(player, SIGNAL(currentMediaChanged(QMediaContent)), this, SLOT(currentMediaChanged(QMediaContent)));
 
     spotify = new Spotify(); //cria o objeto para interagir com o Spotify
     connectSpotify(spotify, this);
@@ -38,4 +38,18 @@ void connectSpotify(Spotify * s, MainWindow *w)
             return;
 
     }
+}
+
+
+//Função acionada quando o botão 'Buscar' é clicado
+void MainWindow::on_pushButton_buscar_clicked()
+{
+    ui->listWidget_musica->clear(); //limpa os resultados da busca anterior
+    spotify->searchFor(ui->lineEdit_musica->text(), ui->listWidget_musica);
+}
+
+
+void MainWindow::on_pushButton_limpar_clicked()
+{
+    ui->lineEdit_musica->clear(); //limpa a busca anterior
 }

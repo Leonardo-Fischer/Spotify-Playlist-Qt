@@ -11,21 +11,32 @@
 #include <QtNetworkAuth>
 #include <QSslSocket>
 
-//-------------CONSTANTES----------------//
+//Biblioteca para trabalhar com List Wigets
+#include <QListWidgetItem>
 
-//Constantes de configuração
+//Biblioteca para trabalhar com arquivos JSON
+#include <QJsonDocument>
+
+//-----------------------------------DEFINIÇÕES-------------------------------------//
+
+//Definições de configuração
 #define CONFIGURATION_FILE "config.ini"
 
-//Constantes de erro
+//Definições de erro
 #define ERROR_NO_SSL_SUPPORT 100
 #define ERROR_NO_ERROR 0
 
-//---------------------------------------//
+//----------------------------------------------------------------------------------//
 
-//-----------CHAVES DO SPOTIFY-----------//
+//---------------------------CHAVES E URLS DO SPOTIFY---------------------------------//
 
-const QByteArray SPOTIFY_CLIENT_ID = "INSIRA SEU ClientID AQUI";
-const QByteArray SPOTIFY_CLIENT_SECRET = "INSIRA SEU Client Secret AQUI";
+const QByteArray SPOTIFY_CLIENT_ID = "INSIRA AQUI SEU CLIENT ID";
+const QByteArray SPOTIFY_CLIENT_SECRET = "INSIRA AQUI SEU SECRET ID";
+const QByteArray SPOTIFY_AUTHORIZATION_URL = "https://accounts.spotify.com/authorize";
+const QByteArray SPOTIFY_ACCESS_TOKEN_URL = "https://accounts.spotify.com/api/token";
+
+
+//----------------------------------------------------------------------------------//
 
 
 class Spotify : public QObject
@@ -37,9 +48,10 @@ public:
 
     int connectSpotify();
 
+    void searchFor(QString searchMusic, QListWidget *listResults);
+
 private:
 
-    void setupConnection();
     void granted();
     void authenticationStatusChanged (QAbstractOAuth::Status status);
 
@@ -49,6 +61,7 @@ private:
     QOAuth2AuthorizationCodeFlow spotify;
     bool isGranted;
 
+    QMap<int, QString> searchDictionary;
 };
 
 #endif // SPOTIFY_H

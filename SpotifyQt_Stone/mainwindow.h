@@ -19,6 +19,11 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+private slots:
+    void on_pushButton_buscar_clicked();
+
+    void on_pushButton_limpar_clicked();
+
 private:
     Ui::MainWindow *ui;
     QMediaPlayer *player;
