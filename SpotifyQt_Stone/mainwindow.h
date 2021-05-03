@@ -24,6 +24,10 @@ private slots:
 
     void on_pushButton_limpar_clicked();
 
+    void on_pushButton_adicionar_clicked();
+
+    void on_pushButton_remover_clicked();
+
 private:
     Ui::MainWindow *ui;
     QMediaPlayer *player;

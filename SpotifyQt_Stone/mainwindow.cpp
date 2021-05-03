@@ -17,6 +17,8 @@ MainWindow::MainWindow(QWidget *parent)
     spotify = new Spotify(); //cria o objeto para interagir com o Spotify
     connectSpotify(spotify, this);
 
+    //loadPlaylist();
+
 }
 
 MainWindow::~MainWindow()
@@ -52,4 +54,14 @@ void MainWindow::on_pushButton_buscar_clicked()
 void MainWindow::on_pushButton_limpar_clicked()
 {
     ui->lineEdit_musica->clear(); //limpa a busca anterior
+}
+
+void MainWindow::on_pushButton_adicionar_clicked()
+{
+    spotify->addMusic(ui->listWidget_musica, ui->listWidget_playlist);
+}
+
+void MainWindow::on_pushButton_remover_clicked()
+{
+    spotify->removeMusic(ui->listWidget_playlist);
 }

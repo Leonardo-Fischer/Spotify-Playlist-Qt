@@ -81,35 +81,104 @@ void Spotify::searchFor(QString searchMusic, QListWidget *listResults)
         const auto responseData = reply->readAll(); //recebe toda a resposta do GET request
         //qDebug() << responseData;
 
-        const auto documentJSON = QJsonDocument::fromJson(responseData); //cria um documento JSON
-        const auto objectJSON = documentJSON.object(); //retorna o objeto do documento
+        const auto documentJSON = QJsonDocument::fromJson(responseData);        //cria um documento JSON
+        const auto objectJSON = documentJSON.object();      //retorna o objeto do documento
         //qDebug() << objectJSON.keys(); //imprime a chave que engloba outros dados no formato JSON (como se fosse um dicionário), neste caso: ("tracks")
 
         QJsonObject filteredObjectJSON = objectJSON["tracks"].toObject();
         //qDebug() << filteredObjectJSON; //imprime as chave que englobam outros dados no formato JSON, neste caso: ("href", "items", "limit", "next", "offset", "previous", "total")
 
-        QJsonArray arrayJSON = filteredObjectJSON["items"].toArray(); //container que recebe os dados dentro de "items"
-        int itemCounter = 0;
+        QJsonArray arrayJSON = filteredObjectJSON["items"].toArray();       //container que recebe os dados dentro de "items"
+
+        int itemCounter = 0;        //contador que servirá de índice para os itens que aparecerão como resultado
 
         foreach(const QJsonValue &valueJSON, arrayJSON)
         {
             QJsonObject valueObjectJSON = valueJSON.toObject();
             //qDebug() << "Name: " + valueObjectJSON["name"].toString() + ", URL: " + valueObjectJSON["preview_url"].toString();
 
-            if(valueJSON["preview_url"].toString() != "") //verificação necessária pois algumas 'preview_url' podem vir vazias, assim estas não aparecerão no resultado da busca
+            if(valueJSON["preview_url"].toString() != "")       //verificação necessária pois algumas 'preview_url' podem vir vazias, assim estas não aparecerão no resultado da busca
             {
-                itemCounter++;
                 listResults->addItem(valueObjectJSON["name"].toString());
-                searchDictionary.insert(itemCounter, valueJSON["preview_url"].toString());//ordena os itens dentro do dicionário
+                searchDictionary.insert(itemCounter, valueJSON["preview_url"].toString());      //insere os itens dentro do dicionário referenciados conforme o valor do contador
+                itemCounter++;
             }
         }
 
+        //qDebug() << searchDictionary.keys(); //imprime as chaves que servem de índice para as URLs
+        //qDebug() << searchDictionary.values(); //imprime as URLs inseridas no dicionários (teste para verificar se elas tinham sido inseridas)
+
     });
+}
+
+//Função que insere a música na playlist
+void Spotify::addMusic(QListWidget *listResults, QListWidget *listPlaylist)
+{
+    if (positionOnPlaylist < 0)       //caso em que todos os itens da playlist foram removidos
+        positionOnPlaylist = 0;
+
+    //qDebug() << listResults->currentRow();        //imprime a posição da musica selecionada dentro da ListWidget que contém o resultado da busca
+
+    listPlaylist->addItem(listResults->currentItem()->text());      //adiciona a música selecionada na playlist
+    playlistDictionary.insert(positionOnPlaylist, searchDictionary.value(listResults->currentRow()));       //adiciona a URL da música selecionada na playlist
+
+    //qDebug() << playlistDictionary.values();      //imprime a URL do item adicionado à Playlist
+    //qDebug() << positionOnPlaylist;       //imprime a posição do item na Playlist
+
+    positionOnPlaylist++;
+
+}
+
+//Função que remove a música da playlist
+void Spotify::removeMusic(QListWidget *listPlaylist)
+{
+    //qDebug() << playlistDictionary;
 
 
+    int index = 0;
+
+    if (listPlaylist->currentRow() == -1) //caso em que o botão de remover é apertado sem o cursor estar acionado na ListWidget
+        listPlaylist->setCurrentRow(0);
+    else if (playlistDictionary.isEmpty()) //caso em que o dicionário está vazio, condição necessária para que não haja índices negativos caso o usuário continue a apagar a lista sem haver itens
+    {
+        positionOnPlaylist = 0;
+        playlistDictionary.clear();
+    }
+    else if (listPlaylist->currentRow() == 0) //quando a música a ser apagada da lista é a primeira (índice 0)
+    {
+        playlistDictionary.remove(listPlaylist->currentRow()); //remove a URL da música selecionada do dicionário de URLs
+        listPlaylist->takeItem(listPlaylist->currentRow()); //remove a música selecionada na playlist
+
+        for(index = 1; index <= positionOnPlaylist; index++)
+        {
+            playlistDictionary.insert(index-1,playlistDictionary.value(index));
+            playlistDictionary.remove(index);
+        }
+    }
+    else if (listPlaylist->currentRow() < positionOnPlaylist) //quando a música a ser apagada não é a primeira nem a última da lista
+    {
+        index = listPlaylist->currentRow();
+
+        playlistDictionary.remove(listPlaylist->currentRow()); //remove a URL da música selecionada do dicionário de URLs
+        listPlaylist->takeItem(listPlaylist->currentRow()); //remove a música selecionada na playlist
+
+        while (index < positionOnPlaylist)
+        {
+            playlistDictionary.insert(index,playlistDictionary.value(index+1));
+            playlistDictionary.remove(index+1);
+            index++;
+        }
+    }
+    else if (listPlaylist->currentRow() == positionOnPlaylist) //quando a música a ser apagada é a última da lista
+    {
+        playlistDictionary.remove(listPlaylist->currentRow());//remove a URL da música selecionada do dicionário de URLs
+        listPlaylist->takeItem(listPlaylist->currentRow()); //remove a música selecionada na playlist
+    }
 
 
+    positionOnPlaylist--; //atualiza a quantidade de músicas dentro da playlist
 
 
+    //qDebug() << playlistDictionary; //para verificar se as URLs foram ordenadas e/ou removidas corretamente no dicionário
 
 }

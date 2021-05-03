@@ -49,6 +49,8 @@ public:
     int connectSpotify();
 
     void searchFor(QString searchMusic, QListWidget *listResults);
+    void addMusic(QListWidget *listResults, QListWidget *listPlaylist);
+    void removeMusic(QListWidget *listPlaylist);
 
 private:
 
@@ -62,6 +64,9 @@ private:
     bool isGranted;
 
     QMap<int, QString> searchDictionary;
+    QMap<int, QString> playlistDictionary;
+
+    int positionOnPlaylist = 0;
 };
 
 #endif // SPOTIFY_H
