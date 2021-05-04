@@ -6,6 +6,10 @@
 #include <QByteArray>
 #include <QDesktopServices>
 
+//Bibliotecas para execução das músicas
+#include <QMediaPlaylist> //classe que permite a criação de playlists
+#include <QMediaPlayer> //classe que permite a reprodução de mídia
+
 //Bibliotecas para autenticação com o servidor do Spotify
 #include <QOAuth2AuthorizationCodeFlow>
 #include <QtNetworkAuth>
@@ -49,8 +53,10 @@ public:
     int connectSpotify();
 
     void searchFor(QString searchMusic, QListWidget *listResults);
-    void addMusic(QListWidget *listResults, QListWidget *listPlaylist);
+    void addMusic(QListWidget *listResults, QListWidget *listPlaylist, QMediaPlaylist *executePlaylist);
     void removeMusic(QListWidget *listPlaylist);
+    void playMusic(QListWidget *listPlaylist, QMediaPlaylist *executePlaylist, QMediaPlayer *executePlayer);
+    void pauseMusic(QMediaPlayer *executePlayer);
 
 private:
 

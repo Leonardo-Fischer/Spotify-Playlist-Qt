@@ -2,8 +2,6 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include <QMediaPlaylist> //classe que permite a criação de playlists
-#include <QMediaPlayer> //classe que permite a reprodução de mídia
 #include "spotify.h"
 #include <QMessageBox>
 
@@ -27,6 +25,10 @@ private slots:
     void on_pushButton_adicionar_clicked();
 
     void on_pushButton_remover_clicked();
+
+    void on_pushButton_executar_clicked();
+
+    void on_pushButton_pausar_clicked();
 
 private:
     Ui::MainWindow *ui;

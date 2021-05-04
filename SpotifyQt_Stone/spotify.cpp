@@ -112,15 +112,16 @@ void Spotify::searchFor(QString searchMusic, QListWidget *listResults)
 }
 
 //Função que insere a música na playlist
-void Spotify::addMusic(QListWidget *listResults, QListWidget *listPlaylist)
+void Spotify::addMusic(QListWidget *listResults, QListWidget *listPlaylist, QMediaPlaylist *executePlaylist)
 {
-    if (positionOnPlaylist < 0)       //caso em que todos os itens da playlist foram removidos
+    if (positionOnPlaylist == -1)       //caso em que todos os itens da playlist foram removidos
         positionOnPlaylist = 0;
 
     //qDebug() << listResults->currentRow();        //imprime a posição da musica selecionada dentro da ListWidget que contém o resultado da busca
 
     listPlaylist->addItem(listResults->currentItem()->text());      //adiciona a música selecionada na playlist
     playlistDictionary.insert(positionOnPlaylist, searchDictionary.value(listResults->currentRow()));       //adiciona a URL da música selecionada na playlist
+    //executePlaylist->addMedia(QUrl(playlistDictionary.value(listPlaylist->currentRow())));
 
     //qDebug() << playlistDictionary.values();      //imprime a URL do item adicionado à Playlist
     //qDebug() << positionOnPlaylist;       //imprime a posição do item na Playlist
@@ -181,4 +182,29 @@ void Spotify::removeMusic(QListWidget *listPlaylist)
 
     //qDebug() << playlistDictionary; //para verificar se as URLs foram ordenadas e/ou removidas corretamente no dicionário
 
+}
+
+//Função que executa a música
+void Spotify::playMusic(QListWidget *listPlaylist, QMediaPlaylist *executePlaylist, QMediaPlayer *executePlayer)
+{
+    if (listPlaylist->currentRow() == -1) //caso em que o botão de executar a playlist é apertado sem o cursor estar acionado na ListWidget
+        listPlaylist->setCurrentRow(0);
+
+    executePlaylist->clear(); // apaga toda a QMediaPlaylist para poder construir uma nova
+
+    for (int i = 0; i <= positionOnPlaylist; i++) // loop para inserir as URLs dentro da QMediaPlaylist conforme ordem atual, desta forma a playlist sempre estará atualizada
+    {
+        executePlaylist->addMedia(QUrl(playlistDictionary.value(i)));
+    }
+    executePlaylist->setPlaybackMode(QMediaPlaylist::Sequential); // seta o modo de execução da playlist para 'Sequencial', as músicas serão executadas a partir da selecionada na playlist até o final dela
+
+    executePlayer->setPlaylist(executePlaylist); // o objeto QMediaPlayer recebe a playlist para poder executar
+    executePlayer->playlist()->setCurrentIndex(listPlaylist->currentRow()); // seta o índice da playlist para que a música seja executada a partir da que foi selecionada
+    executePlayer->play(); // toca a playlist
+}
+
+//Função que pausa a música
+void Spotify::pauseMusic(QMediaPlayer *executePlayer)
+{
+    executePlayer->pause();
 }
