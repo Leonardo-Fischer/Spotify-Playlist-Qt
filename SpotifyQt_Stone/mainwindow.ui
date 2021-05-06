@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>SpotifyQt - Desafio Stone</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <widget class="QWidget" name="layoutWidget">
@@ -148,13 +148,6 @@
       <widget class="QPushButton" name="pushButton_pausar">
        <property name="text">
         <string>Pausar Playlist</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="pushButton_salvar">
-       <property name="text">
-        <string>Salvar Playlist</string>
        </property>
       </widget>
      </item>

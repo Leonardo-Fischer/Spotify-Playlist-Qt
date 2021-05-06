@@ -3,12 +3,12 @@
 
 Spotify::Spotify()
 {
-    QSettings settings(CONFIGURATION_FILE, QSettings::IniFormat);
-    settings.beginGroup("Auth");
+    positionOnPlaylist = 0; //contador utilizado por quase todas as funções do objeto 'Spotify' para contabilizar a posição atual do item na playlist ou então a quantidade de itens dentro da playlist
+}
 
-    ClientID = SPOTIFY_CLIENT_ID;
-    ClientIDSecret = SPOTIFY_CLIENT_SECRET;
-
+Spotify::~Spotify()
+{
+    deleteLater();  //destrói o objeto 'Spotify'
 }
 
 //Estabelece conexão com o Spotify
@@ -26,8 +26,8 @@ int Spotify::connectSpotify()
         spotify.setReplyHandler(replyHandler);
         spotify.setAuthorizationUrl(QUrl(SPOTIFY_AUTHORIZATION_URL));
         spotify.setAccessTokenUrl(QUrl(SPOTIFY_ACCESS_TOKEN_URL));
-        spotify.setClientIdentifier(ClientID);
-        spotify.setClientIdentifierSharedKey(ClientIDSecret);
+        spotify.setClientIdentifier(SPOTIFY_CLIENT_ID);
+        spotify.setClientIdentifierSharedKey(SPOTIFY_CLIENT_SECRET);
         spotify.setScope("user-read-private user-top-read playlist-read-private playlist-modify-public playlist-modify-private");
 
         connect(&spotify, &QOAuth2AuthorizationCodeFlow::authorizeWithBrowser, &QDesktopServices::openUrl);
@@ -54,7 +54,7 @@ void Spotify::authenticationStatusChanged(QAbstractOAuth::Status status)
     if (status == QAbstractOAuth::Status::TemporaryCredentialsReceived)
         stat = "TemporaryCredentialsReceived";
 
-    qDebug() << "Auth Status changed: " + stat;
+    qDebug() << "Authentication status changed: " + stat;
 }
 
 //Função acionada quando o 'granted' SIGNAL é disparado durante o processo de autenticacao
@@ -112,16 +112,19 @@ void Spotify::searchFor(QString searchMusic, QListWidget *listResults)
 }
 
 //Função que insere a música na playlist
-void Spotify::addMusic(QListWidget *listResults, QListWidget *listPlaylist, QMediaPlaylist *executePlaylist)
+void Spotify::addMusic(QListWidget *listResults, QListWidget *listPlaylist)
 {
-    if (positionOnPlaylist == -1)       //caso em que todos os itens da playlist foram removidos
+    if (positionOnPlaylist == -1 || searchDictionary.isEmpty())       //caso em que todos os itens da playlist foram removidos
+    {
         positionOnPlaylist = 0;
+        return;
+    }
 
     //qDebug() << listResults->currentRow();        //imprime a posição da musica selecionada dentro da ListWidget que contém o resultado da busca
 
     listPlaylist->addItem(listResults->currentItem()->text());      //adiciona a música selecionada na playlist
     playlistDictionary.insert(positionOnPlaylist, searchDictionary.value(listResults->currentRow()));       //adiciona a URL da música selecionada na playlist
-    //executePlaylist->addMedia(QUrl(playlistDictionary.value(listPlaylist->currentRow())));
+
 
     //qDebug() << playlistDictionary.values();      //imprime a URL do item adicionado à Playlist
     //qDebug() << positionOnPlaylist;       //imprime a posição do item na Playlist
@@ -179,7 +182,6 @@ void Spotify::removeMusic(QListWidget *listPlaylist)
 
     positionOnPlaylist--; //atualiza a quantidade de músicas dentro da playlist
 
-
     //qDebug() << playlistDictionary; //para verificar se as URLs foram ordenadas e/ou removidas corretamente no dicionário
 
 }
@@ -203,8 +205,43 @@ void Spotify::playMusic(QListWidget *listPlaylist, QMediaPlaylist *executePlayli
     executePlayer->play(); // toca a playlist
 }
 
-//Função que pausa a música
+//Função que para a execução da música
 void Spotify::pauseMusic(QMediaPlayer *executePlayer)
 {
     executePlayer->pause();
+}
+
+//Função que cria o arquivo para salvar a playlist
+void Spotify::createPlaylistFile(QListWidget *listPlaylist)
+{
+    playlistFile = new FileHandler();               //cria objeto para manipulação de arquivo
+    for (int i = 0; i<= positionOnPlaylist; i++)
+    {
+        playlistFile->writeOnFile(listPlaylist->item(i)->text(), playlistDictionary.value(i));  //escreve o nome da música e sua URL dentro do arquivo
+    }
+    playlistFile->~FileHandler();   //destrói o objeto de manipulação de arquivo
+}
+
+//Função que carrega a playlist do arquivo "playlist.txt"
+void Spotify::loadPlaylistFile(QListWidget *listPlaylist)
+{
+    QFile loadFile("playlist.txt"); //cria novo objeto de arquivo e o nomeia de "playlist.txt"
+
+    if (!loadFile.open(QIODevice::ReadOnly | QIODevice::Text))  //tenta ler o arquivo "playlist.txt", caso já exista não entra na condição
+    {
+        qDebug() << "Arquivo local de playlist ainda não existe!";
+        return;
+    }
+
+    QTextStream in(&loadFile);  //habilita leitura no arquivo
+
+    while(!in.atEnd())          //executa o laço até que não hajam mais dados para ler dentro do arquivo
+    {
+        listPlaylist->addItem(in.readLine());                           //adiciona o nome da música dentro da playlist
+        playlistDictionary.insert(positionOnPlaylist, in.readLine());   //adiciona a URL da música dentro do dicionário de URLs
+        positionOnPlaylist++;
+    }
+
+    loadFile.close();   //fecha o arquivo
+
 }

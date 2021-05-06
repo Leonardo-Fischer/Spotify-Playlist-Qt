@@ -12,17 +12,17 @@ MainWindow::MainWindow(QWidget *parent)
     playlist = new QMediaPlaylist; //cria o objeto para playlist de mídia
 
     player = new QMediaPlayer; //cria o objeto para execução de mídia
-    //connect(player, SIGNAL(currentMediaChanged(QMediaContent)), this, SLOT(currentMediaChanged(QMediaContent)));
 
     spotify = new Spotify(); //cria o objeto para interagir com o Spotify
     connectSpotify(spotify, this);
 
-    //loadPlaylist();
+    spotify->loadPlaylistFile(ui->listWidget_playlist);
 
 }
 
 MainWindow::~MainWindow()
 {
+    spotify->createPlaylistFile(ui->listWidget_playlist);
     delete ui;
 }
 
@@ -38,7 +38,6 @@ void connectSpotify(Spotify * s, MainWindow *w)
         case ERROR_NO_ERROR:
         default:
             return;
-
     }
 }
 
@@ -58,7 +57,7 @@ void MainWindow::on_pushButton_limpar_clicked()
 
 void MainWindow::on_pushButton_adicionar_clicked()
 {
-    spotify->addMusic(ui->listWidget_musica, ui->listWidget_playlist, playlist);
+    spotify->addMusic(ui->listWidget_musica, ui->listWidget_playlist);
 }
 
 void MainWindow::on_pushButton_remover_clicked()
@@ -76,3 +75,4 @@ void MainWindow::on_pushButton_pausar_clicked()
 {
     spotify->pauseMusic(player);
 }
+

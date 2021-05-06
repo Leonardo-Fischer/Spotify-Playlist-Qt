@@ -1,8 +1,9 @@
 #ifndef SPOTIFY_H
 #define SPOTIFY_H
 
+//----------------------------------BIBLIOTECAS--------------------------------------//
+
 #include <QObject>
-#include <QSettings>
 #include <QByteArray>
 #include <QDesktopServices>
 
@@ -21,24 +22,24 @@
 //Biblioteca para trabalhar com arquivos JSON
 #include <QJsonDocument>
 
-//-----------------------------------DEFINIÇÕES-------------------------------------//
 
-//Definições de configuração
-#define CONFIGURATION_FILE "config.ini"
+#include "filehandler.h"
+
+//----------------------------------------------------------------------------------//
+
+//-----------------------------------DEFINIÇÕES-------------------------------------//
 
 //Definições de erro
 #define ERROR_NO_SSL_SUPPORT 100
 #define ERROR_NO_ERROR 0
 
 //----------------------------------------------------------------------------------//
-
 //---------------------------CHAVES E URLS DO SPOTIFY---------------------------------//
 
 const QByteArray SPOTIFY_CLIENT_ID = "INSIRA AQUI SEU CLIENT ID";
 const QByteArray SPOTIFY_CLIENT_SECRET = "INSIRA AQUI SEU SECRET ID";
 const QByteArray SPOTIFY_AUTHORIZATION_URL = "https://accounts.spotify.com/authorize";
 const QByteArray SPOTIFY_ACCESS_TOKEN_URL = "https://accounts.spotify.com/api/token";
-
 
 //----------------------------------------------------------------------------------//
 
@@ -48,23 +49,25 @@ class Spotify : public QObject
     Q_OBJECT
 
 public:
+
     Spotify();
+    ~Spotify();
 
     int connectSpotify();
 
     void searchFor(QString searchMusic, QListWidget *listResults);
-    void addMusic(QListWidget *listResults, QListWidget *listPlaylist, QMediaPlaylist *executePlaylist);
+    void addMusic(QListWidget *listResults, QListWidget *listPlaylist);
     void removeMusic(QListWidget *listPlaylist);
     void playMusic(QListWidget *listPlaylist, QMediaPlaylist *executePlaylist, QMediaPlayer *executePlayer);
     void pauseMusic(QMediaPlayer *executePlayer);
+    void createPlaylistFile(QListWidget *listPlaylist);
+    void loadPlaylistFile(QListWidget *listPlaylist);
 
 private:
 
     void granted();
     void authenticationStatusChanged (QAbstractOAuth::Status status);
 
-    QString ClientID;
-    QString ClientIDSecret;
 
     QOAuth2AuthorizationCodeFlow spotify;
     bool isGranted;
@@ -72,7 +75,9 @@ private:
     QMap<int, QString> searchDictionary;
     QMap<int, QString> playlistDictionary;
 
-    int positionOnPlaylist = 0;
+    int positionOnPlaylist;
+
+    FileHandler *playlistFile;
 };
 
 #endif // SPOTIFY_H
