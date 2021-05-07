@@ -1,3 +1,7 @@
+//------------------Desafio Stone 07/05/2021-----------------------//
+//---Projeto desenvolvido por Leonardo Fischer Bastos dos Santos---//
+//-----------------------------------------------------------------//
+
 #include "spotify.h"
 
 
@@ -16,24 +20,24 @@ int Spotify::connectSpotify()
 {
     try
     {
-        if (!QSslSocket::supportsSsl())
+        if (!QSslSocket::supportsSsl())     //verifica se a plataforma suporta SSL, caso não suporte a conexão não será estabelecida
         {
             throw ERROR_NO_SSL_SUPPORT;
         }
-
-        auto replyHandler = new QOAuthHttpServerReplyHandler(8080, this);
-        replyHandler->setCallbackPath("callback");
+        auto replyHandler = new QOAuthHttpServerReplyHandler(8080, this);   //configura a porta 8080 para comunicação com a aplicação
+        replyHandler->setCallbackPath("callback");                          //acrescenta o caminho que recebe a resposta do servidor, URI configurada no Redirect URIs do Spotify for Developers:http://127.0.0.1:8080/callback
         spotify.setReplyHandler(replyHandler);
-        spotify.setAuthorizationUrl(QUrl(SPOTIFY_AUTHORIZATION_URL));
-        spotify.setAccessTokenUrl(QUrl(SPOTIFY_ACCESS_TOKEN_URL));
-        spotify.setClientIdentifier(SPOTIFY_CLIENT_ID);
-        spotify.setClientIdentifierSharedKey(SPOTIFY_CLIENT_SECRET);
-        spotify.setScope("user-read-private user-top-read playlist-read-private playlist-modify-public playlist-modify-private");
+        spotify.setAuthorizationUrl(QUrl(SPOTIFY_AUTHORIZATION_URL));       //seta a URL para pedido de de autorização no Spotify (esse endereço é utilizado para que o usuário possa permitir a autenticação)
+        spotify.setAccessTokenUrl(QUrl(SPOTIFY_ACCESS_TOKEN_URL));          //seta a URL utilizada para requisitar a chave de acesso (token) ao Spotify
+        spotify.setClientIdentifier(SPOTIFY_CLIENT_ID);                     //configura o Spotify Client ID
+        spotify.setClientIdentifierSharedKey(SPOTIFY_CLIENT_SECRET);        //configura o Spotify Client Secret ID
+        spotify.setScope("user-read-private user-top-read playlist-read-private playlist-modify-public playlist-modify-private");   //seta o escopo de permissões requisitadas pela aplicação
 
-        connect(&spotify, &QOAuth2AuthorizationCodeFlow::authorizeWithBrowser, &QDesktopServices::openUrl);
-        connect(&spotify, &QOAuth2AuthorizationCodeFlow::statusChanged, this, &Spotify::authenticationStatusChanged);
-        connect(&spotify, &QOAuth2AuthorizationCodeFlow::granted, this, &Spotify::granted);
-        spotify.grant();
+
+        connect(&spotify, &QOAuth2AuthorizationCodeFlow::authorizeWithBrowser, &QDesktopServices::openUrl);             //conexão da aplicação com o navegador
+        connect(&spotify, &QOAuth2AuthorizationCodeFlow::statusChanged, this, &Spotify::authenticationStatusChanged);   //conecta sinal 'statusChanged' ao slot 'authenticationStatusChanged' da classe Spotify //'statusChanged' será emitido quando o status da autenticação é atualizado
+        connect(&spotify, &QOAuth2AuthorizationCodeFlow::granted, this, &Spotify::granted);                             //conecta sinal 'granted' ao slot 'granted' da classe Spotify //'granted' será emtido quando o fluxo de autorização é finalizado com sucesso
+        spotify.grant();        //inicia de fato o fluxo de autenticação conforme descrito pela RFC 6749 -  The OAuth 2.0 Authorization Framework
         return ERROR_NO_ERROR;
 
     }
@@ -54,6 +58,9 @@ void Spotify::authenticationStatusChanged(QAbstractOAuth::Status status)
     if (status == QAbstractOAuth::Status::TemporaryCredentialsReceived)
         stat = "TemporaryCredentialsReceived";
 
+    if (status == QAbstractOAuth::Status::NotAuthenticated)
+        stat = "NotAuthenticated";
+
     qDebug() << "Authentication status changed: " + stat;
 }
 
@@ -61,7 +68,6 @@ void Spotify::authenticationStatusChanged(QAbstractOAuth::Status status)
 void Spotify::granted()
 {
    qDebug() << "Signal granted received";
-   //qDebug() << "Token: " + spotify.token();
    isGranted = true;
 }
 
@@ -69,38 +75,31 @@ void Spotify::granted()
 //Função que busca a música no Spotify
 void Spotify::searchFor(QString searchMusic, QListWidget *listResults)
 {
-    QString type = "type=track"; //especifica o tipo de busca que será feita, neste caso busca apenas pela música
-    QUrl requestURL ("https://api.spotify.com/v1/search?q=" + searchMusic + "&" + type);
+    QString type = "type=track";                                                            //especifica o tipo de busca que será feita, neste caso busca apenas pela música
+    QUrl requestURL ("https://api.spotify.com/v1/search?q=" + searchMusic + "&" + type);    //formação da URL para requisitar a música ao servidor
 
     searchDictionary.clear(); //Dicionário que mapeia os itens resultantes da busca
 
-    auto reply = spotify.get(requestURL);
+    auto reply = spotify.get(requestURL);   //envia um 'GET request' autenticado e recebe como resposta um 'QNetworkReply'
 
-    connect(reply, &QNetworkReply::finished, [=]()
+    connect(reply, &QNetworkReply::finished, [=]()  //sinal 'finished' é emitido quando a resposta recebida do servidor do Spotify é completamente processada
     {
-        const auto responseData = reply->readAll(); //recebe toda a resposta do GET request
-        //qDebug() << responseData;
-
-        const auto documentJSON = QJsonDocument::fromJson(responseData);        //cria um documento JSON
-        const auto objectJSON = documentJSON.object();      //retorna o objeto do documento
-        //qDebug() << objectJSON.keys(); //imprime a chave que engloba outros dados no formato JSON (como se fosse um dicionário), neste caso: ("tracks")
+        const auto responseData = reply->readAll();                         //variável 'responseData' recebe toda a resposta do GET request
+        const auto documentJSON = QJsonDocument::fromJson(responseData);    //cria um documento JSON
+        const auto objectJSON = documentJSON.object();                      //retorna o objeto do documento
 
         QJsonObject filteredObjectJSON = objectJSON["tracks"].toObject();
-        //qDebug() << filteredObjectJSON; //imprime as chave que englobam outros dados no formato JSON, neste caso: ("href", "items", "limit", "next", "offset", "previous", "total")
-
         QJsonArray arrayJSON = filteredObjectJSON["items"].toArray();       //container que recebe os dados dentro de "items"
 
-        int itemCounter = 0;        //contador que servirá de índice para os itens que aparecerão como resultado
+        int itemCounter = 0; //contador que servirá de índice para os itens que aparecerão como resultado
 
         foreach(const QJsonValue &valueJSON, arrayJSON)
         {
             QJsonObject valueObjectJSON = valueJSON.toObject();
-            //qDebug() << "Name: " + valueObjectJSON["name"].toString() + ", URL: " + valueObjectJSON["preview_url"].toString();
-
-            if(valueJSON["preview_url"].toString() != "")       //verificação necessária pois algumas 'preview_url' podem vir vazias, assim estas não aparecerão no resultado da busca
+            if(valueJSON["preview_url"].toString() != "")               //verificação necessária pois algumas 'preview_url' podem vir vazias, assim estas não aparecerão no resultado da busca
             {
-                listResults->addItem(valueObjectJSON["name"].toString());
-                searchDictionary.insert(itemCounter, valueJSON["preview_url"].toString());      //insere os itens dentro do dicionário referenciados conforme o valor do contador
+                listResults->addItem(valueObjectJSON["name"].toString());                   //insere o nome da música no QListWidget listResults
+                searchDictionary.insert(itemCounter, valueJSON["preview_url"].toString());  //insere os itens dentro do dicionário referenciados conforme o valor do contador
                 itemCounter++;
             }
         }
@@ -114,31 +113,21 @@ void Spotify::searchFor(QString searchMusic, QListWidget *listResults)
 //Função que insere a música na playlist
 void Spotify::addMusic(QListWidget *listResults, QListWidget *listPlaylist)
 {
-    if (positionOnPlaylist == -1 || searchDictionary.isEmpty())       //caso em que todos os itens da playlist foram removidos
+    if (positionOnPlaylist == -1 || searchDictionary.isEmpty()) //caso em que todos os itens da playlist foram removidos
     {
         positionOnPlaylist = 0;
         return;
     }
 
-    //qDebug() << listResults->currentRow();        //imprime a posição da musica selecionada dentro da ListWidget que contém o resultado da busca
-
-    listPlaylist->addItem(listResults->currentItem()->text());      //adiciona a música selecionada na playlist
-    playlistDictionary.insert(positionOnPlaylist, searchDictionary.value(listResults->currentRow()));       //adiciona a URL da música selecionada na playlist
-
-
-    //qDebug() << playlistDictionary.values();      //imprime a URL do item adicionado à Playlist
-    //qDebug() << positionOnPlaylist;       //imprime a posição do item na Playlist
+    listPlaylist->addItem(listResults->currentItem()->text());                                          //adiciona a música selecionada na playlist
+    playlistDictionary.insert(positionOnPlaylist, searchDictionary.value(listResults->currentRow()));   //adiciona a URL da música selecionada na playlist
 
     positionOnPlaylist++;
-
 }
 
 //Função que remove a música da playlist
 void Spotify::removeMusic(QListWidget *listPlaylist)
 {
-    //qDebug() << playlistDictionary;
-
-
     int index = 0;
 
     if (listPlaylist->currentRow() == -1) //caso em que o botão de remover é apertado sem o cursor estar acionado na ListWidget

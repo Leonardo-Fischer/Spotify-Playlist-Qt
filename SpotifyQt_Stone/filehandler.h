@@ -1,3 +1,7 @@
+//------------------Desafio Stone 07/05/2021-----------------------//
+//---Projeto desenvolvido por Leonardo Fischer Bastos dos Santos---//
+//-----------------------------------------------------------------//
+
 #ifndef FILEHANDLER_H
 #define FILEHANDLER_H
 

@@ -1,3 +1,7 @@
+//------------------Desafio Stone 07/05/2021-----------------------//
+//---Projeto desenvolvido por Leonardo Fischer Bastos dos Santos---//
+//-----------------------------------------------------------------//
+
 #include "filehandler.h"
 
 FileHandler::FileHandler(QObject *parent) : QObject(parent)

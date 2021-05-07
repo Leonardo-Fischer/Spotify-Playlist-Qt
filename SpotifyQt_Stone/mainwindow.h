@@ -1,9 +1,12 @@
+//------------------Desafio Stone 07/05/2021-----------------------//
+//---Projeto desenvolvido por Leonardo Fischer Bastos dos Santos---//
+//-----------------------------------------------------------------//
+
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
 #include <QMainWindow>
 #include "spotify.h"
-#include <QMessageBox>
 
 
 QT_BEGIN_NAMESPACE

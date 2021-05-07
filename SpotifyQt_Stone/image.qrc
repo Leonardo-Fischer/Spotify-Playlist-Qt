@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/logo_spotify">
+        <file>logo_spotify/Spotify_Logo_RGB_White.png</file>
+    </qresource>
+</RCC>

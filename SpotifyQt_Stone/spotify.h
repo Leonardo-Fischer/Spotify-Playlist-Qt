@@ -1,11 +1,16 @@
+//------------------Desafio Stone 07/05/2021-----------------------//
+//---Projeto desenvolvido por Leonardo Fischer Bastos dos Santos---//
+//-----------------------------------------------------------------//
+
 #ifndef SPOTIFY_H
 #define SPOTIFY_H
 
 //----------------------------------BIBLIOTECAS--------------------------------------//
-
+#include "filehandler.h"
 #include <QObject>
 #include <QByteArray>
 #include <QDesktopServices>
+#include <QMessageBox>
 
 //Bibliotecas para execução das músicas
 #include <QMediaPlaylist> //classe que permite a criação de playlists
@@ -23,10 +28,6 @@
 #include <QJsonDocument>
 
 
-#include "filehandler.h"
-
-//----------------------------------------------------------------------------------//
-
 //-----------------------------------DEFINIÇÕES-------------------------------------//
 
 //Definições de erro
@@ -36,8 +37,8 @@
 //----------------------------------------------------------------------------------//
 //---------------------------CHAVES E URLS DO SPOTIFY---------------------------------//
 
-const QByteArray SPOTIFY_CLIENT_ID = "INSIRA AQUI SEU CLIENT ID";
-const QByteArray SPOTIFY_CLIENT_SECRET = "INSIRA AQUI SEU SECRET ID";
+const QByteArray SPOTIFY_CLIENT_ID = "34e9287c7da24d8f90a820004a6697af";
+const QByteArray SPOTIFY_CLIENT_SECRET = "551b4d701ba24dde85650b0bd22936f6";
 const QByteArray SPOTIFY_AUTHORIZATION_URL = "https://accounts.spotify.com/authorize";
 const QByteArray SPOTIFY_ACCESS_TOKEN_URL = "https://accounts.spotify.com/api/token";
 

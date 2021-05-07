@@ -1,3 +1,7 @@
+//------------------Desafio Stone 07/05/2021-----------------------//
+//---Projeto desenvolvido por Leonardo Fischer Bastos dos Santos---//
+//-----------------------------------------------------------------//
+
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include <QMediaContent>
@@ -26,6 +30,7 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+//Função para se conectar ao servidor do Spotify
 void connectSpotify(Spotify * s, MainWindow *w)
 {
     int error = s->connectSpotify();
@@ -49,30 +54,32 @@ void MainWindow::on_pushButton_buscar_clicked()
     spotify->searchFor(ui->lineEdit_musica->text(), ui->listWidget_musica);
 }
 
-
+//Função acionada quando o botão 'Limpar' é clicado
 void MainWindow::on_pushButton_limpar_clicked()
 {
     ui->lineEdit_musica->clear(); //limpa a busca anterior
 }
 
+//Função acionada quando o botão 'Adicionar música à playlist' é clicado
 void MainWindow::on_pushButton_adicionar_clicked()
 {
     spotify->addMusic(ui->listWidget_musica, ui->listWidget_playlist);
 }
 
+//Função acionada quando o botão 'Remover música da playlist' é clicado
 void MainWindow::on_pushButton_remover_clicked()
 {
     spotify->removeMusic(ui->listWidget_playlist);
 }
 
+//Função acionada quando o botão 'Executar playlist' é clicado
 void MainWindow::on_pushButton_executar_clicked()
 {
-
     spotify->playMusic(ui->listWidget_playlist, playlist, player);
 }
 
+//Função acionada quando o botão 'Pausar playlist' é clicado
 void MainWindow::on_pushButton_pausar_clicked()
 {
     spotify->pauseMusic(player);
 }
-

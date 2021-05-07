@@ -29,3 +29,6 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 DISTFILES += \
     Spotify_Logo_RGB_Green.pdf
+
+RESOURCES += \
+    image.qrc
