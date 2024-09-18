@@ -1,5 +1,5 @@
 # Spotify-Playlist-Qt
-**Desafio Stone** - Projeto desenvolvido em Qt (C++) que utiliza a Spotify Web API, cria e executa uma Playlist
+Projeto desenvolvido em Qt (C++) que utiliza a Spotify Web API, cria e executa uma Playlist
 
 ## Funcionalidades
 1. Busca por músicas (amostras de 30 segundos)
